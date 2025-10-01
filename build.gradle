@@ -4,8 +4,8 @@ apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     ext {
-        kotlinVersion = '1.7.10'
-        minSdkVersion = 24
+        kotlinVersion = '2.2.20'
+        minSdkVersion = 35
     }
     repositories {
         google()
@@ -13,7 +13,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.13.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.40.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
@@ -26,6 +26,6 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
 }

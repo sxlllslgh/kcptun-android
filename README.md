@@ -1,35 +1,25 @@
 ## kcptun for Android
 
-[![CircleCI](https://circleci.com/gh/shadowsocks/kcptun-android.svg?style=svg)](https://circleci.com/gh/shadowsocks/kcptun-android)
-[![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=21)
-[![Releases](https://img.shields.io/github/downloads/shadowsocks/kcptun-android/total.svg)](https://github.com/shadowsocks/kcptun-android/releases)
-[![Language: Kotlin](https://img.shields.io/github/languages/top/shadowsocks/kcptun-android.svg)](https://github.com/shadowsocks/kcptun-android/search?l=kotlin)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/46b34df6fe624ef9a46507126f407880)](https://www.codacy.com/app/shadowsocks/kcptun-android?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shadowsocks/kcptun-android&amp;utm_campaign=Badge_Grade)
-[![License](https://img.shields.io/github/license/shadowsocks/kcptun-android.svg)](https://github.com/shadowsocks/kcptun-android/blob/master/LICENSE)
-
-[kcptun](https://github.com/shadowsocks/kcptun) plugin for [shadowsocks-android](https://github.com/shadowsocks/shadowsocks-android).
-
-<a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks.plugin.kcptun"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
+[![API](https://img.shields.io/badge/API-35%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=35)
+[![Releases](https://img.shields.io/github/downloads/sxlllslgh/kcptun-android/total.svg)](https://github.com/sxlllslgh/kcptun-android/releases)
+[![Language: Kotlin](https://img.shields.io/github/languages/top/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/search?l=kotlin)
+[![License](https://img.shields.io/github/license/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/blob/master/LICENSE)
 
 ### PREREQUISITES
 
-* JDK 1.8
-* Go 1.11+
+* JDK 21
+* Go 1.24.2
 * Android SDK
-  - Android NDK r19+
+  - Android NDK r29
 
 ### BUILD
 
-You can check whether the latest commit builds under UNIX environment by checking CI status.
+You can check whether the latest commit builds under UNIX environment.
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk-bundle`)
 * Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
 * Build it using Android Studio or gradle script
-
-### TRANSLATE
-
-This plugin is an official plugin thus you can see [shadowsocks-android](https://github.com/shadowsocks/shadowsocks-android/blob/master/README.md#translate)'s instructions to translate this plugin's UI.
 
 ## OPEN SOURCE LICENSES
 

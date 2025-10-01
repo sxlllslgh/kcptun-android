@@ -18,14 +18,19 @@ def getCurrentFlavor() {
 }
 
 android {
-    buildToolsVersion "33.0.0"
-    compileSdkVersion 33
+    buildToolsVersion "36.0.0"
+    compileSdkVersion 36
+    namespace 'com.github.shadowsocks.plugin.kcptun'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
     defaultConfig {
         applicationId "com.github.shadowsocks.plugin.kcptun"
         minSdkVersion rootProject.minSdkVersion
-        targetSdkVersion 33
-        versionCode 1000200
-        versionName "1.0.2"
+        targetSdkVersion 36
+        versionCode 2000000
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -44,7 +49,7 @@ android {
     sourceSets.main.jniLibs.srcDirs += new File(projectDir, "src/bin")
 }
 
-task goBuild(type: Exec) {
+tasks.register('goBuild', Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         println "Warning: Building on Windows is not supported"
     } else {
@@ -53,7 +58,7 @@ task goBuild(type: Exec) {
     }
 }
 
-task goClean(type: Exec) {
+tasks.register('goClean', Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         println "Warning: Building on Windows is not supported"
     } else {
@@ -62,7 +67,7 @@ task goClean(type: Exec) {
     }
 }
 
-tasks.whenTaskAdded { task ->
+tasks.configureEach { task ->
     if ((task.name == 'javaPreCompileDebug' ||
             task.name == 'javaPreCompileRelease')) {
         task.dependsOn(goBuild)
@@ -74,8 +79,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     implementation 'com.github.shadowsocks:plugin:2.0.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
 }
 
 ext.abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, x86: 3, x86_64: 4]
