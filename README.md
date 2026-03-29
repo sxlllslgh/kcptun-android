@@ -1,14 +1,14 @@
 ## kcptun for Android
 
-[![API](https://img.shields.io/badge/API-35%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=35)
+[![API](https://img.shields.io/badge/API-36%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=35)
 [![Releases](https://img.shields.io/github/downloads/sxlllslgh/kcptun-android/total.svg)](https://github.com/sxlllslgh/kcptun-android/releases)
 [![Language: Kotlin](https://img.shields.io/github/languages/top/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/search?l=kotlin)
 [![License](https://img.shields.io/github/license/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/blob/master/LICENSE)
 
 ### PREREQUISITES
 
-* JDK 21
-* Go 1.24.2
+* JDK 24
+* Go 1.26.1
 * Android SDK
   - Android NDK r29
 
@@ -17,7 +17,7 @@
 You can check whether the latest commit builds under UNIX environment.
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
-* (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk-bundle`)
+* (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk`)
 * Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
 * Build it using Android Studio or gradle script
 

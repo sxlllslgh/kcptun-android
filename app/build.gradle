@@ -20,10 +20,10 @@ def getCurrentFlavor() {
 android {
     buildToolsVersion "36.0.0"
     compileSdkVersion 36
-    namespace 'com.github.shadowsocks.plugin.kcptun'
+    namespace = 'com.github.shadowsocks.plugin.kcptun'
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_24
+        targetCompatibility JavaVersion.VERSION_24
     }
     defaultConfig {
         applicationId "com.github.shadowsocks.plugin.kcptun"
@@ -36,14 +36,14 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     splits {
         abi {
-            enable true
-            universalApk true
+            enable = true
+            universalApk = true
         }
     }
     sourceSets.main.jniLibs.srcDirs += new File(projectDir, "src/bin")
