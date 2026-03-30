@@ -22,8 +22,8 @@ android {
     compileSdkVersion 36
     namespace = 'com.github.shadowsocks.plugin.kcptun'
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_24
-        targetCompatibility JavaVersion.VERSION_24
+        sourceCompatibility JavaVersion.VERSION_25
+        targetCompatibility JavaVersion.VERSION_25
     }
     defaultConfig {
         applicationId "com.github.shadowsocks.plugin.kcptun"
@@ -36,8 +36,8 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources = true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro')
         }
     }
     splits {
@@ -47,6 +47,15 @@ android {
         }
     }
     sourceSets.main.jniLibs.srcDirs += new File(projectDir, "src/bin")
+    packaging {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+}
+
+kotlin {
+    jvmToolchain(25)
 }
 
 tasks.register('goBuild', Exec) {
@@ -68,8 +77,7 @@ tasks.register('goClean', Exec) {
 }
 
 tasks.configureEach { task ->
-    if ((task.name == 'javaPreCompileDebug' ||
-            task.name == 'javaPreCompileRelease')) {
+    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
         task.dependsOn(goBuild)
     }
 }

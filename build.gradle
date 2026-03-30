@@ -4,7 +4,7 @@ apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     ext {
-        kotlinVersion = '2.2.20'
+        kotlinVersion = '2.3.20'
         minSdkVersion = 35
     }
     repositories {
@@ -13,7 +13,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath 'com.android.tools.build:gradle:9.1.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.40.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }

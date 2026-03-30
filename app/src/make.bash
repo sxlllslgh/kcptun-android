@@ -29,6 +29,9 @@ export GOPATH=$DIR
 [ ! -d "$DIR/kcptun/client" ] && echo "Missing submodule directory: $DIR/kcptun/client" && exit -1
 try pushd "$DIR/kcptun/client"
 
+git -C $DIR/kcptun checkout v20260314
+git -C $DIR/kcptun apply $DIR/patches/kcptun.patch
+
 if [ ! -f "$TARGET/armeabi-v7a/libkcptun.so" ] || [ ! -f "$TARGET/arm64-v8a/libkcptun.so" ] || [ ! -f "$TARGET/x86/libkcptun.so" ] || [ ! -f "$TARGET/x86_64/libkcptun.so" ]; then
 
     echo "Download dependencies for kcptun"

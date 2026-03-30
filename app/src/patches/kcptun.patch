@@ -1,0 +1,48 @@
+diff --git a/client/main.go b/client/main.go
+index af5db51..57c6283 100644
+--- a/client/main.go
++++ b/client/main.go
+@@ -31,6 +31,7 @@ import (
+ 	"net/http"
+ 	_ "net/http/pprof"
+ 	"os"
++	"strings"
+ 	"time"
+ 
+ 	"golang.org/x/crypto/pbkdf2"
+@@ -57,6 +58,35 @@ const (
+ var VERSION = "SELFBUILD"
+ 
+ func main() {
++    opts := os.Getenv("SS_PLUGIN_OPTIONS")
++    if opts != "" {
++        for _, kv := range strings.Split(opts, ";") {
++            if strings.HasPrefix(kv, "__") {
++                continue
++            }
++
++            parts := strings.SplitN(kv, "=", 2)
++            if len(parts) == 2 {
++                os.Args = append(os.Args, "--"+parts[0], parts[1])
++            } else {
++                os.Args = append(os.Args, "--"+kv)
++            }
++        }
++    }
++    local_host := os.Getenv("SS_LOCAL_HOST")
++    local_port := os.Getenv("SS_LOCAL_PORT")
++
++    if local_host != "" && local_port != "" {
++        os.Args = append(os.Args, "--localaddr", net.JoinHostPort(local_host, local_port))
++    }
++
++    remote_host := os.Getenv("SS_REMOTE_HOST")
++    remote_port := os.Getenv("SS_REMOTE_PORT")
++
++    if remote_host != "" && remote_port != "" {
++        os.Args = append(os.Args, "--remoteaddr", net.JoinHostPort(remote_host, remote_port))
++    }
++
+ 	if VERSION == "SELFBUILD" {
+ 		// Enable timestamps + file:line to simplify debugging self-built binaries.
+ 		log.SetFlags(log.LstdFlags | log.Lshortfile)

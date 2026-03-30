@@ -7,19 +7,26 @@
 
 ### PREREQUISITES
 
-* JDK 24
+* JDK 25
 * Go 1.26.1
 * Android SDK
-  - Android NDK r29
+  - Android NDK r30
 
 ### BUILD
 
-You can check whether the latest commit builds under UNIX environment.
+#### 1. Common
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
-* (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk`)
-* Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
-* Build it using Android Studio or gradle script
+* Clone the repo using `git clone --recurse-submodules https://github.com/sxlllslgh/kcptun-android.git` or update submodules using `git submodule update --init --recursive`
+
+#### 2. Windows specified (Linux/Mac OS skip)
+Use GitBash or WSL to run `app/src/make.bash`, remember change NDK toolchain path defined in `make.bash` Line 18 to:
+```bash
+TOOLCHAIN=$(find "$ANDROID_NDK_HOME" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)/toolchains/llvm/prebuilt/windows-x86_64/bin
+```
+
+#### 3. Just Build
+Build it using Android Studio or gradle script.
 
 ## OPEN SOURCE LICENSES
 
