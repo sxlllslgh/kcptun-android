@@ -23,4 +23,8 @@ endif()
 add_executable(shimakaze_android_client android_client_main.cpp)
 target_link_libraries(shimakaze_android_client PRIVATE shimakaze_core)
 target_compile_features(shimakaze_android_client PRIVATE cxx_std_23)
-set_target_properties(shimakaze_android_client PROPERTIES OUTPUT_NAME shimakaze)
+set_target_properties(shimakaze_android_client
+    PROPERTIES
+        OUTPUT_NAME shimakaze
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+)

@@ -100,8 +100,8 @@ for ABI in armeabi-v7a arm64-v8a x86 x86_64; do
         -DFETCHCONTENT_BASE_DIR="$DIR/.deps"
     try cmake --build "$BUILD_DIR" --target shimakaze_android_client --parallel
 
-    BUILT_BINARY=$(find "$BUILD_DIR" -type f -name shimakaze -print -quit)
-    [ -z "$BUILT_BINARY" ] && echo "Built shimakaze client was not found under $BUILD_DIR" && exit 1
+    BUILT_BINARY="$BUILD_DIR/bin/shimakaze"
+    [ ! -f "$BUILT_BINARY" ] && echo "Built shimakaze client was not found: $BUILT_BINARY" && exit 1
     try cp "$BUILT_BINARY" "$OUT"
     try "$TOOLCHAIN/llvm-strip" "$OUT"
 done
