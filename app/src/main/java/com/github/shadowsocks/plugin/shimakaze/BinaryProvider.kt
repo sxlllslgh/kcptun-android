@@ -1,4 +1,4 @@
-package com.github.shadowsocks.plugin.kcptun
+package com.github.shadowsocks.plugin.shimakaze
 
 import android.net.Uri
 import android.os.ParcelFileDescriptor
@@ -9,12 +9,12 @@ import java.io.FileNotFoundException
 
 class BinaryProvider : NativePluginProvider() {
     override fun populateFiles(provider: PathProvider) {
-        provider.addPath("kcptun", 0b111101101)
+        provider.addPath("shimakaze", 0b111101101)
     }
 
-    override fun getExecutable() = context!!.applicationInfo.nativeLibraryDir + "/libkcptun.so"
+    override fun getExecutable() = context!!.applicationInfo.nativeLibraryDir + "/libshimakaze.so"
     override fun openFile(uri: Uri): ParcelFileDescriptor = when (uri.path) {
-        "/kcptun" -> ParcelFileDescriptor.open(
+        "/shimakaze" -> ParcelFileDescriptor.open(
             File(getExecutable()),
             ParcelFileDescriptor.MODE_READ_ONLY
         )

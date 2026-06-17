@@ -1,9 +1,9 @@
-## kcptun for Android
+## shimakaze for Android
 
 [![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=29)
-[![Releases](https://img.shields.io/github/downloads/sxlllslgh/kcptun-android/total.svg)](https://github.com/sxlllslgh/kcptun-android/releases)
-[![Language: Kotlin](https://img.shields.io/github/languages/top/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/search?l=kotlin)
-[![License](https://img.shields.io/github/license/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/blob/master/LICENSE)
+[![Releases](https://img.shields.io/github/downloads/sxlllslgh/shimakaze-android/total.svg)](https://github.com/sxlllslgh/shimakaze-android/releases)
+[![Language: Kotlin](https://img.shields.io/github/languages/top/sxlllslgh/shimakaze-android.svg)](https://github.com/sxlllslgh/shimakaze-android/search?l=kotlin)
+[![License](https://img.shields.io/github/license/sxlllslgh/shimakaze-android.svg)](https://github.com/sxlllslgh/shimakaze-android/blob/main/LICENSE)
 
 ### PREREQUISITES
 
@@ -18,8 +18,8 @@
 #### 1. Common
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
-* Clone the repo using `git clone --recurse-submodules https://github.com/sxlllslgh/kcptun-android.git` or update submodules using `git submodule update --init --recursive`
-* The native shimakaze dependency is updated from `https://github.com/sxlllslgh/shimakaze.git` during the Gradle build. The build script prefers `master` when present and falls back to the repository default branch (`main` at the time this was written).
+* Clone the repo using `git clone --recurse-submodules https://github.com/sxlllslgh/shimakaze-android.git` or update submodules using `git submodule update --init --recursive`
+* The native shimakaze dependency is updated from `https://github.com/sxlllslgh/shimakaze.git` during the Gradle build. The build script tracks `main` by default; override it with `SHIMAKAZE_BRANCH` when needed.
 
 #### 2. Windows specified (Linux/Mac OS skip)
 Use WSL to run `app/src/make.bash`. Native builds from Gradle are supported on Linux/macOS CI; Android Studio on Windows can still build the Kotlin/Android part after the native binaries exist.

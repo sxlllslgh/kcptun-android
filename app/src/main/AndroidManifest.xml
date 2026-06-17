@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.github.shadowsocks.plugin.kcptun">
+    package="com.github.shadowsocks.plugin.shimakaze">
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -8,10 +8,10 @@
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="kcptun">
+        android:label="shimakaze">
         <provider
-            android:name="com.github.shadowsocks.plugin.kcptun.BinaryProvider"
-            android:authorities="com.github.shadowsocks.plugin.kcptun.BinaryProvider"
+            android:name="com.github.shadowsocks.plugin.shimakaze.BinaryProvider"
+            android:authorities="com.github.shadowsocks.plugin.shimakaze.BinaryProvider"
             android:directBootAware="true"
             android:exported="true"
             tools:ignore="ExportedContentProvider">
@@ -22,19 +22,19 @@
                 <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" />
                 <data
                     android:host="com.github.shadowsocks"
-                    android:pathPrefix="/kcptun"
+                    android:pathPrefix="/shimakaze"
                     android:scheme="plugin" />
             </intent-filter>
 
             <meta-data
                 android:name="com.github.shadowsocks.plugin.id"
-                android:value="kcptun" />
+                android:value="shimakaze" />
             <meta-data
                 android:name="com.github.shadowsocks.plugin.default_config"
                 android:value="crypt=none;mode=normal;mtu=1200;nocomp;dscp=46;parityshard=0" />
         </provider>
         <activity
-            android:name="com.github.shadowsocks.plugin.kcptun.HelpCallback"
+            android:name="com.github.shadowsocks.plugin.shimakaze.HelpCallback"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Translucent">
             <intent-filter>
@@ -42,7 +42,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:host="com.github.shadowsocks"
-                    android:path="/kcptun"
+                    android:path="/shimakaze"
                     android:scheme="plugin" />
             </intent-filter>
         </activity>

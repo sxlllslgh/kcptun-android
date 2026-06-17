@@ -36,10 +36,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT="$( cd "$DIR/../.." && pwd )"
 MIN_API=${1:-29}
 TARGET=$DIR/bin
-SOURCE=$DIR/kcptun
+SOURCE=$DIR/shimakaze
 SHIMAKAZE_SOURCE=$SOURCE/shimakaze
 SHIMAKAZE_REPOSITORY=${SHIMAKAZE_REPOSITORY:-https://github.com/sxlllslgh/shimakaze.git}
-PREFERRED_BRANCH=${KCPTUN_BRANCH:-master}
+PREFERRED_BRANCH=${SHIMAKAZE_BRANCH:-main}
 
 try mkdir -p "$TARGET/armeabi-v7a" "$TARGET/x86" "$TARGET/arm64-v8a" "$TARGET/x86_64"
 
@@ -57,8 +57,8 @@ if [ ! -d "$SOURCE/.git" ] && [ ! -f "$SOURCE/.git" ]; then
     if [ -d "$SOURCE" ] && [ -z "$(find "$SOURCE" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
         try git clone --recurse-submodules "$SHIMAKAZE_REPOSITORY" "$SOURCE"
     else
-        try git -C "$ROOT" submodule sync -- app/src/kcptun
-        try git -C "$ROOT" submodule update --init --recursive app/src/kcptun
+        try git -C "$ROOT" submodule sync -- app/src/shimakaze
+        try git -C "$ROOT" submodule update --init --recursive app/src/shimakaze
     fi
 fi
 
@@ -83,7 +83,7 @@ try git -C "$SOURCE" submodule update --init --recursive --remote
 [ ! -f "$SHIMAKAZE_SOURCE/CMakeLists.txt" ] && echo "Missing shimakaze CMake project: $SHIMAKAZE_SOURCE" && exit 1
 
 for ABI in armeabi-v7a arm64-v8a x86 x86_64; do
-    OUT="$TARGET/$ABI/libkcptun.so"
+    OUT="$TARGET/$ABI/libshimakaze.so"
     if [ -f "$OUT" ]; then
         continue
     fi
@@ -98,9 +98,9 @@ for ABI in armeabi-v7a arm64-v8a x86 x86_64; do
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_TESTING=OFF \
         -DFETCHCONTENT_BASE_DIR="$DIR/.deps"
-    try cmake --build "$BUILD_DIR" --target kcptun_android_client --parallel
+    try cmake --build "$BUILD_DIR" --target shimakaze_android_client --parallel
 
-    BUILT_BINARY=$(find "$BUILD_DIR" -type f -name kcptun -print -quit)
+    BUILT_BINARY=$(find "$BUILD_DIR" -type f -name shimakaze -print -quit)
     [ -z "$BUILT_BINARY" ] && echo "Built shimakaze client was not found under $BUILD_DIR" && exit 1
     try cp "$BUILT_BINARY" "$OUT"
     try "$TOOLCHAIN/llvm-strip" "$OUT"

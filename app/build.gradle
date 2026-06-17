@@ -20,13 +20,13 @@ def getCurrentFlavor() {
 android {
     buildToolsVersion "36.0.0"
     compileSdkVersion 36
-    namespace = 'com.github.shadowsocks.plugin.kcptun'
+    namespace = 'com.github.shadowsocks.plugin.shimakaze'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_25
         targetCompatibility JavaVersion.VERSION_25
     }
     defaultConfig {
-        applicationId "com.github.shadowsocks.plugin.kcptun"
+        applicationId "com.github.shadowsocks.plugin.shimakaze"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion 36
         versionCode 2000001
