@@ -9,3 +9,6 @@
 /build
 /captures
 .externalNativeBuild
+/app/src/.cxx
+/app/src/.deps
+/app/src/bin

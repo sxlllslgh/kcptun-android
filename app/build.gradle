@@ -29,8 +29,8 @@ android {
         applicationId "com.github.shadowsocks.plugin.kcptun"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion 36
-        versionCode 2000000
-        versionName "2.0.0"
+        versionCode 2000001
+        versionName "2.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -58,7 +58,7 @@ kotlin {
     jvmToolchain(25)
 }
 
-tasks.register('goBuild', Exec) {
+tasks.register('nativeBuild', Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         println "Warning: Building on Windows is not supported"
     } else {
@@ -67,7 +67,7 @@ tasks.register('goBuild', Exec) {
     }
 }
 
-tasks.register('goClean', Exec) {
+tasks.register('nativeClean', Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         println "Warning: Building on Windows is not supported"
     } else {
@@ -78,7 +78,7 @@ tasks.register('goClean', Exec) {
 
 tasks.configureEach { task ->
     if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
-        task.dependsOn(goBuild)
+        task.dependsOn(nativeBuild)
     }
 }
 

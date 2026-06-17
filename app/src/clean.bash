@@ -2,7 +2,8 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-rm -rf $DIR/.deps
-rm -rf $DIR/bin
+rm -rf "$DIR/.deps"
+rm -rf "$DIR/.cxx"
+rm -rf "$DIR/bin"
 
-echo "Successfully clean kcptun"
+echo "Successfully clean shimakaze"

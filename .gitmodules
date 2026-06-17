@@ -1,3 +1,4 @@
 [submodule "app/src/kcptun"]
 	path = app/src/kcptun
-	url = https://github.com/xtaci/kcptun.git
+	url = https://github.com/sxlllslgh/shimakaze.git
+	branch = main

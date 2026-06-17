@@ -1,6 +1,6 @@
 ## kcptun for Android
 
-[![API](https://img.shields.io/badge/API-36%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=35)
+[![API](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=29)
 [![Releases](https://img.shields.io/github/downloads/sxlllslgh/kcptun-android/total.svg)](https://github.com/sxlllslgh/kcptun-android/releases)
 [![Language: Kotlin](https://img.shields.io/github/languages/top/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/search?l=kotlin)
 [![License](https://img.shields.io/github/license/sxlllslgh/kcptun-android.svg)](https://github.com/sxlllslgh/kcptun-android/blob/master/LICENSE)
@@ -8,9 +8,10 @@
 ### PREREQUISITES
 
 * JDK 25
-* Go 1.26.1
+* CMake 4.3+
+* Ninja
 * Android SDK
-  - Android NDK r30
+  - Android NDK r29 or newer
 
 ### BUILD
 
@@ -18,20 +19,21 @@
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Clone the repo using `git clone --recurse-submodules https://github.com/sxlllslgh/kcptun-android.git` or update submodules using `git submodule update --init --recursive`
+* The native shimakaze dependency is updated from `https://github.com/sxlllslgh/shimakaze.git` during the Gradle build. The build script prefers `master` when present and falls back to the repository default branch (`main` at the time this was written).
 
 #### 2. Windows specified (Linux/Mac OS skip)
-Use GitBash or WSL to run `app/src/make.bash`, remember change NDK toolchain path defined in `make.bash` Line 18 to:
-```bash
-TOOLCHAIN=$(find "$ANDROID_NDK_HOME" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)/toolchains/llvm/prebuilt/windows-x86_64/bin
-```
+Use WSL to run `app/src/make.bash`. Native builds from Gradle are supported on Linux/macOS CI; Android Studio on Windows can still build the Kotlin/Android part after the native binaries exist.
 
 #### 3. Just Build
 Build it using Android Studio or gradle script.
 
+GitHub Actions also builds release APK artifacts on push, pull request, and manual dispatch.
+
 ## OPEN SOURCE LICENSES
 
 <ul>
-    <li>kcptun: <a href="https://github.com/shadowsocks/kcptun/blob/shadowsocks/LICENSE.md">MIT</a></li>
+    <li>shimakaze: <a href="https://github.com/sxlllslgh/shimakaze">GPL-3.0-or-later</a></li>
+    <li>KCP: <a href="https://github.com/skywind3000/kcp">MIT</a></li>
 </ul>
 
 ### LICENSE

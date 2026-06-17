@@ -1,71 +1,109 @@
 #!/bin/bash
 
 function try () {
-"$@" || exit -1
+"$@" || exit 1
 }
 
-if [ -z "$ANDROID_NDK_HOME" ]; then
-    if [ -n "$ANDROID_SDK_ROOT" ] && [ -d "$ANDROID_SDK_ROOT/ndk" ]; then
-        ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk-bundle"
-    elif [ -n "$ANDROID_HOME" ] && [ -d "$ANDROID_HOME/ndk" ]; then
-        ANDROID_NDK_HOME="$ANDROID_HOME/ndk"
-    fi
-fi
+function newest_dir () {
+    [ -d "$1" ] || return 1
+    find "$1" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1
+}
 
-[ -z "$ANDROID_NDK_HOME" ] && echo "ANDROID_NDK_HOME is not set and no NDK was found under ANDROID_SDK_ROOT/ANDROID_HOME" && exit -1
-[ ! -d "$ANDROID_NDK_HOME" ] && echo "ANDROID_NDK_HOME does not exist: $ANDROID_NDK_HOME" && exit -1
+function find_ndk () {
+    for candidate in "$ANDROID_NDK_HOME" "$ANDROID_NDK_ROOT"; do
+        if [ -n "$candidate" ] && [ -d "$candidate/build/cmake" ]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
 
-TOOLCHAIN=$(find "$ANDROID_NDK_HOME"/toolchains/llvm/prebuilt/* -maxdepth 1 -type d -print -quit)/bin
-[ ! -d "$TOOLCHAIN" ] && echo "LLVM toolchain not found under: $ANDROID_NDK_HOME" && exit -1
+    for sdk in "$ANDROID_SDK_ROOT" "$ANDROID_HOME"; do
+        [ -n "$sdk" ] || continue
+        if ndk="$(newest_dir "$sdk/ndk")" && [ -n "$ndk" ] && [ -d "$ndk/build/cmake" ]; then
+            echo "$ndk"
+            return 0
+        fi
+        if [ -d "$sdk/ndk-bundle/build/cmake" ]; then
+            echo "$sdk/ndk-bundle"
+            return 0
+        fi
+    done
+
+    return 1
+}
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MIN_API=$1
+ROOT="$( cd "$DIR/../.." && pwd )"
+MIN_API=${1:-29}
 TARGET=$DIR/bin
+SOURCE=$DIR/kcptun
+SHIMAKAZE_SOURCE=$SOURCE/shimakaze
+SHIMAKAZE_REPOSITORY=${SHIMAKAZE_REPOSITORY:-https://github.com/sxlllslgh/shimakaze.git}
+PREFERRED_BRANCH=${KCPTUN_BRANCH:-master}
 
-try mkdir -p $TARGET/armeabi-v7a $TARGET/x86 $TARGET/arm64-v8a $TARGET/x86_64
+try mkdir -p "$TARGET/armeabi-v7a" "$TARGET/x86" "$TARGET/arm64-v8a" "$TARGET/x86_64"
 
-export GOPATH=$DIR
+ANDROID_NDK_HOME="$(find_ndk)" || {
+    echo "ANDROID_NDK_HOME is not set and no NDK was found under ANDROID_SDK_ROOT/ANDROID_HOME"
+    exit 1
+}
+TOOLCHAIN=$(find "$ANDROID_NDK_HOME"/toolchains/llvm/prebuilt/* -maxdepth 1 -type d -print -quit)/bin
+[ ! -d "$TOOLCHAIN" ] && echo "LLVM toolchain not found under: $ANDROID_NDK_HOME" && exit 1
 
-[ ! -d "$DIR/kcptun/client" ] && echo "Missing submodule directory: $DIR/kcptun/client" && exit -1
-try pushd "$DIR/kcptun/client"
+command -v cmake >/dev/null 2>&1 || { echo "cmake is required to build shimakaze"; exit 1; }
+command -v ninja >/dev/null 2>&1 || { echo "ninja is required to build shimakaze"; exit 1; }
 
-git -C $DIR/kcptun checkout v20260314
-git -C $DIR/kcptun apply $DIR/patches/kcptun.patch
-
-if [ ! -f "$TARGET/armeabi-v7a/libkcptun.so" ] || [ ! -f "$TARGET/arm64-v8a/libkcptun.so" ] || [ ! -f "$TARGET/x86/libkcptun.so" ] || [ ! -f "$TARGET/x86_64/libkcptun.so" ]; then
-
-    echo "Download dependencies for kcptun"
-    try go mod download
-    echo "Cross compile kcptun for arm"
-    if [ ! -f "$TARGET/armeabi-v7a/libkcptun.so" ]; then
-        try env CGO_ENABLED=1 CC=$TOOLCHAIN/armv7a-linux-androideabi${MIN_API}-clang GOOS=android GOARCH=arm GOARM=7 go build -trimpath -ldflags="-s -w" -o client .
-        try $TOOLCHAIN/llvm-strip client
-        try mv client $TARGET/armeabi-v7a/libkcptun.so
+if [ ! -d "$SOURCE/.git" ] && [ ! -f "$SOURCE/.git" ]; then
+    if [ -d "$SOURCE" ] && [ -z "$(find "$SOURCE" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+        try git clone --recurse-submodules "$SHIMAKAZE_REPOSITORY" "$SOURCE"
+    else
+        try git -C "$ROOT" submodule sync -- app/src/kcptun
+        try git -C "$ROOT" submodule update --init --recursive app/src/kcptun
     fi
-
-    echo "Cross compile kcptun for arm64"
-    if [ ! -f "$TARGET/arm64-v8a/libkcptun.so" ]; then
-        try env CGO_ENABLED=1 CC=$TOOLCHAIN/aarch64-linux-android${MIN_API}-clang GOOS=android GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o client .
-        try $TOOLCHAIN/llvm-strip client
-        try mv client $TARGET/arm64-v8a/libkcptun.so
-    fi
-
-    echo "Cross compile kcptun for 386"
-    if [ ! -f "$TARGET/x86/libkcptun.so" ]; then
-        try env CGO_ENABLED=1 CC=$TOOLCHAIN/i686-linux-android${MIN_API}-clang GOOS=android GOARCH=386 go build -trimpath -ldflags="-s -w" -o client .
-        try $TOOLCHAIN/llvm-strip client
-        try mv client $TARGET/x86/libkcptun.so
-    fi
-
-    echo "Cross compile kcptun for amd64"
-    if [ ! -f "$TARGET/x86_64/libkcptun.so" ]; then
-        try env CGO_ENABLED=1 CC=$TOOLCHAIN/x86_64-linux-android${MIN_API}-clang GOOS=android GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o client .
-        try $TOOLCHAIN/llvm-strip client
-        try mv client $TARGET/x86_64/libkcptun.so
-    fi
-
 fi
 
-    try popd
+try git -C "$SOURCE" remote set-url origin "$SHIMAKAZE_REPOSITORY"
+try git -C "$SOURCE" fetch --prune origin
 
-echo "Successfully build kcptun"
+TRACK_BRANCH=$PREFERRED_BRANCH
+if ! git -C "$SOURCE" ls-remote --exit-code --heads origin "$TRACK_BRANCH" >/dev/null 2>&1; then
+    if git -C "$SOURCE" ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+        TRACK_BRANCH=main
+    else
+        TRACK_BRANCH=$(git -C "$SOURCE" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')
+    fi
+fi
+
+[ -z "$TRACK_BRANCH" ] && echo "Unable to determine shimakaze tracking branch" && exit 1
+echo "Using shimakaze branch: $TRACK_BRANCH"
+try git -C "$SOURCE" checkout --detach "origin/$TRACK_BRANCH"
+try git -C "$SOURCE" submodule sync --recursive
+try git -C "$SOURCE" submodule update --init --recursive --remote
+
+[ ! -f "$SHIMAKAZE_SOURCE/CMakeLists.txt" ] && echo "Missing shimakaze CMake project: $SHIMAKAZE_SOURCE" && exit 1
+
+for ABI in armeabi-v7a arm64-v8a x86 x86_64; do
+    OUT="$TARGET/$ABI/libkcptun.so"
+    if [ -f "$OUT" ]; then
+        continue
+    fi
+
+    BUILD_DIR="$DIR/.cxx/$ABI"
+    echo "Cross compile shimakaze client for $ABI"
+    try cmake -S "$DIR" -B "$BUILD_DIR" -G Ninja \
+        -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+        -DANDROID_ABI="$ABI" \
+        -DANDROID_PLATFORM="android-$MIN_API" \
+        -DANDROID_STL=c++_static \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_TESTING=OFF \
+        -DFETCHCONTENT_BASE_DIR="$DIR/.deps"
+    try cmake --build "$BUILD_DIR" --target kcptun_android_client --parallel
+
+    BUILT_BINARY=$(find "$BUILD_DIR" -type f -name kcptun -print -quit)
+    [ -z "$BUILT_BINARY" ] && echo "Built shimakaze client was not found under $BUILD_DIR" && exit 1
+    try cp "$BUILT_BINARY" "$OUT"
+    try "$TOOLCHAIN/llvm-strip" "$OUT"
+done
+
+echo "Successfully build shimakaze"
