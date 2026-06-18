@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="internalOnly"
     package="com.github.shadowsocks.plugin.shimakaze">
 
     <uses-feature
@@ -7,6 +8,7 @@
         android:required="false" />
     <application
         android:allowBackup="false"
+        android:extractNativeLibs="true"
         android:icon="@mipmap/ic_launcher"
         android:label="shimakaze">
         <provider

@@ -168,6 +168,26 @@ jobs:
             "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$apk"
           done
 
+      - name: Verify native libraries
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          check_lib() {
+            apk="$1"
+            abi="$2"
+            if ! unzip -Z1 "$apk" | grep -Fxq "lib/$abi/libshimakaze.so"; then
+              echo "::error::$apk is missing lib/$abi/libshimakaze.so"
+              exit 1
+            fi
+          }
+
+          check_lib app/build/outputs/apk/upload/shimakaze-armeabi-v7a-release.apk armeabi-v7a
+          check_lib app/build/outputs/apk/upload/shimakaze-arm64-v8a-release.apk arm64-v8a
+          check_lib app/build/outputs/apk/upload/shimakaze-x86-release.apk x86
+          check_lib app/build/outputs/apk/upload/shimakaze-x86_64-release.apk x86_64
+          for abi in armeabi-v7a arm64-v8a x86 x86_64; do
+            check_lib app/build/outputs/apk/upload/shimakaze-universal-release.apk "$abi"
+          done
+
       - name: Upload universal APK
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v6
