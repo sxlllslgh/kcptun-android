@@ -78,35 +78,95 @@ jobs:
           chmod +x gradlew app/src/*.bash
           ./gradlew --no-daemon :app:assembleRelease
 
-      - name: Verify signed APKs
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/*.apk
-
       - name: Collect APKs
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          release_dir="app/build/outputs/apk/release"
-          upload_dir="app/build/outputs/apk/upload"
-          mkdir -p "$upload_dir"
+          python3 - <<'PY'
+          import json
+          import shutil
+          import sys
+          from pathlib import Path
 
-          copy_apk() {
-            label="$1"
-            pattern="$2"
-            mapfile -t matches < <(find "$release_dir" -maxdepth 1 -type f -name "$pattern" ! -name '*unsigned*' | sort)
-            if [ "${#matches[@]}" -ne 1 ]; then
-              echo "::error::Expected one signed APK for $label, found ${#matches[@]}"
-              printf '%s\n' "${matches[@]}"
-              exit 1
-            fi
-            cp "${matches[0]}" "$upload_dir/shimakaze-$label-release.apk"
-          }
+          release_dir = Path("app/build/outputs/apk/release")
+          upload_dir = Path("app/build/outputs/apk/upload")
+          metadata_file = release_dir / "output-metadata.json"
+          expected = {"universal", "armeabi-v7a", "arm64-v8a", "x86", "x86_64"}
 
-          copy_apk universal '*universal*release*.apk'
-          copy_apk armeabi-v7a '*armeabi-v7a*release*.apk'
-          copy_apk arm64-v8a '*arm64-v8a*release*.apk'
-          copy_apk x86 '*x86-release*.apk'
-          copy_apk x86_64 '*x86_64*release*.apk'
+          def fail(message):
+              print(f"::error::{message}", file=sys.stderr)
+              sys.exit(1)
+
+          def normalize_abi(value):
+              normalized = value.lower()
+              aliases = {
+                  "armeabi": "armeabi-v7a",
+                  "armeabi_v7a": "armeabi-v7a",
+                  "armeabi-v7a": "armeabi-v7a",
+                  "arm64_v8a": "arm64-v8a",
+                  "arm64-v8a": "arm64-v8a",
+                  "x86": "x86",
+                  "x86_64": "x86_64",
+              }
+              return aliases.get(normalized, normalized)
+
+          def label_from_element(element):
+              filters = element.get("filters") or []
+              for item in filters:
+                  if str(item.get("filterType", "")).upper() == "ABI" and item.get("value"):
+                      return normalize_abi(str(item["value"]))
+
+              output_file = str(element.get("outputFile", "")).lower()
+              for candidate in ("arm64-v8a", "x86_64", "armeabi-v7a", "armeabi", "x86"):
+                  if candidate in output_file:
+                      return normalize_abi(candidate)
+              return "universal" if "universal" in output_file else None
+
+          if not metadata_file.is_file():
+              fail(f"Missing APK metadata: {metadata_file}")
+
+          upload_dir.mkdir(parents=True, exist_ok=True)
+          metadata = json.loads(metadata_file.read_text())
+          found = set()
+
+          for element in metadata.get("elements", []):
+              output_file = element.get("outputFile")
+              if not output_file:
+                  continue
+
+              label = label_from_element(element)
+              if label is None:
+                  fail(f"Unable to determine APK label for {output_file}")
+
+              source = release_dir / output_file
+              if not source.is_file():
+                  fail(f"APK listed in metadata does not exist: {source}")
+              if "unsigned" in source.name:
+                  fail(f"Unsigned APK was produced instead of a signed release APK: {source}")
+
+              target = upload_dir / f"shimakaze-{label}-release.apk"
+              shutil.copy2(source, target)
+              found.add(label)
+              print(f"Prepared {target}")
+
+          missing = expected - found
+          extra = found - expected
+          if missing or extra:
+              fail(f"Unexpected APK set. Missing: {sorted(missing)}; extra: {sorted(extra)}")
+          PY
+
+      - name: Verify signed APKs
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/upload/*.apk)
+          if [ "${#apks[@]}" -eq 0 ]; then
+            echo "::error::No APKs were collected for signing verification"
+            exit 1
+          fi
+
+          for apk in "${apks[@]}"; do
+            "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$apk"
+          done
 
       - name: Upload universal APK
         if: ${{ github.event_name != 'pull_request' }}
