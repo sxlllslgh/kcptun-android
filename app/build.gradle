@@ -72,7 +72,11 @@ android {
             universalApk = true
         }
     }
-    sourceSets.main.jniLibs.srcDirs += new File(projectDir, "src/bin")
+    sourceSets {
+        main {
+            jniLibs.srcDirs = [file("src/bin")]
+        }
+    }
     packaging {
         jniLibs {
             useLegacyPackaging true
@@ -84,7 +88,8 @@ kotlin {
     jvmToolchain(25)
 }
 
-tasks.register('nativeBuild', Exec) {
+def nativeBuildTask = tasks.register('nativeBuild', Exec) {
+    outputs.dir(file("src/bin"))
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         println "Warning: Building on Windows is not supported"
     } else {
@@ -103,8 +108,11 @@ tasks.register('nativeClean', Exec) {
 }
 
 tasks.configureEach { task ->
-    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
-        task.dependsOn(nativeBuild)
+    if (task.name == 'javaPreCompileDebug' ||
+            task.name == 'javaPreCompileRelease' ||
+            (task.name.startsWith('merge') &&
+                    (task.name.endsWith('JniLibFolders') || task.name.endsWith('NativeLibs')))) {
+        task.dependsOn(nativeBuildTask)
     }
 }
 
