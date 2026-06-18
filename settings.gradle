@@ -1,3 +1,15 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        maven {
+            name = 'MavenCentralRepo1'
+            url = uri('https://repo1.maven.org/maven2/')
+        }
+        mavenCentral()
+    }
+}
+
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
