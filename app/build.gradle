@@ -17,6 +17,17 @@ def getCurrentFlavor() {
     }
 }
 
+def releaseStoreFile = System.getenv('SHIMAKAZE_KEYSTORE_FILE')
+def releaseStorePassword = System.getenv('SHIMAKAZE_KEYSTORE_PASSWORD')
+def releaseKeyAlias = System.getenv('SHIMAKAZE_KEY_ALIAS')
+def releaseKeyPassword = System.getenv('SHIMAKAZE_KEY_PASSWORD')
+def hasValue = { value -> value != null && !value.trim().isEmpty() }
+def releaseSigningValues = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword]
+def releaseSigningEnabled = releaseSigningValues.every { hasValue(it) }
+if (releaseSigningValues.any { hasValue(it) } && !releaseSigningEnabled) {
+    throw new GradleException('Release signing is partially configured. Set SHIMAKAZE_KEYSTORE_FILE, SHIMAKAZE_KEYSTORE_PASSWORD, SHIMAKAZE_KEY_ALIAS, and SHIMAKAZE_KEY_PASSWORD.')
+}
+
 android {
     buildToolsVersion "36.0.0"
     compileSdkVersion 36
@@ -33,8 +44,21 @@ android {
         versionName "2.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        if (releaseSigningEnabled) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            if (releaseSigningEnabled) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled true
             shrinkResources true
             proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro')

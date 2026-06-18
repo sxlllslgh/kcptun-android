@@ -10,6 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SHIMAKAZE_KEYSTORE_BASE64: ${{ secrets.SHIMAKAZE_KEYSTORE_BASE64 }}
+      SHIMAKAZE_KEYSTORE_PASSWORD: ${{ secrets.SHIMAKAZE_KEYSTORE_PASSWORD }}
+      SHIMAKAZE_KEY_ALIAS: ${{ secrets.SHIMAKAZE_KEY_ALIAS }}
+      SHIMAKAZE_KEY_PASSWORD: ${{ secrets.SHIMAKAZE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -44,14 +49,105 @@ jobs:
           ninja --version
           sdkmanager --version
 
+      - name: Validate signing secrets
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          missing=0
+          for name in \
+            SHIMAKAZE_KEYSTORE_BASE64 \
+            SHIMAKAZE_KEYSTORE_PASSWORD \
+            SHIMAKAZE_KEY_ALIAS \
+            SHIMAKAZE_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required to build installable signed release APKs"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Decode signing keystore
+        if: ${{ env.SHIMAKAZE_KEYSTORE_BASE64 != '' }}
+        run: |
+          keystore_file="$RUNNER_TEMP/shimakaze-release.keystore"
+          printf '%s' "$SHIMAKAZE_KEYSTORE_BASE64" | base64 --decode > "$keystore_file"
+          echo "SHIMAKAZE_KEYSTORE_FILE=$keystore_file" >> "$GITHUB_ENV"
+
       - name: Build release APKs
         run: |
           chmod +x gradlew app/src/*.bash
           ./gradlew --no-daemon :app:assembleRelease
 
-      - name: Upload APKs
+      - name: Verify signed APKs
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/*.apk
+
+      - name: Collect APKs
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          release_dir="app/build/outputs/apk/release"
+          upload_dir="app/build/outputs/apk/upload"
+          mkdir -p "$upload_dir"
+
+          copy_apk() {
+            label="$1"
+            pattern="$2"
+            mapfile -t matches < <(find "$release_dir" -maxdepth 1 -type f -name "$pattern" ! -name '*unsigned*' | sort)
+            if [ "${#matches[@]}" -ne 1 ]; then
+              echo "::error::Expected one signed APK for $label, found ${#matches[@]}"
+              printf '%s\n' "${matches[@]}"
+              exit 1
+            fi
+            cp "${matches[0]}" "$upload_dir/shimakaze-$label-release.apk"
+          }
+
+          copy_apk universal '*universal*release*.apk'
+          copy_apk armeabi-v7a '*armeabi-v7a*release*.apk'
+          copy_apk arm64-v8a '*arm64-v8a*release*.apk'
+          copy_apk x86 '*x86-release*.apk'
+          copy_apk x86_64 '*x86_64*release*.apk'
+
+      - name: Upload universal APK
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v6
         with:
-          name: shimakaze-android-apks
-          path: app/build/outputs/apk/**/*.apk
+          name: shimakaze-universal-release-apk
+          path: app/build/outputs/apk/upload/shimakaze-universal-release.apk
           if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload armeabi-v7a APK
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: shimakaze-armeabi-v7a-release-apk
+          path: app/build/outputs/apk/upload/shimakaze-armeabi-v7a-release.apk
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload arm64-v8a APK
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: shimakaze-arm64-v8a-release-apk
+          path: app/build/outputs/apk/upload/shimakaze-arm64-v8a-release.apk
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload x86 APK
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: shimakaze-x86-release-apk
+          path: app/build/outputs/apk/upload/shimakaze-x86-release.apk
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload x86_64 APK
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: shimakaze-x86_64-release-apk
+          path: app/build/outputs/apk/upload/shimakaze-x86_64-release.apk
+          if-no-files-found: error
+          compression-level: 0
